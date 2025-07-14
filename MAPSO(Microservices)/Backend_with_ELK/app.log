@@ -1,0 +1,2 @@
+{"asctime": "2025-07-04 16:22:35,406", "levelname": "INFO", "name": "central_logger", "message": "Flask application starting", "port": 5000, "debug": true}
+{"asctime": "2025-07-04 16:22:38,709", "levelname": "INFO", "name": "central_logger", "message": "Flask application starting", "port": 5000, "debug": true}

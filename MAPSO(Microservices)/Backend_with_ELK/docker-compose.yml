@@ -1,0 +1,331 @@
+# # # # version: '3.8'
+
+# # # # services:
+# # # #   flask-app:
+# # # #     build: .
+# # # #     container_name: flask-app
+# # # #     ports:
+# # # #       - "5001:5001"
+# # # #     depends_on:
+# # # #       - logstash
+# # # #     networks:
+# # # #       - elk
+
+# # # #   elasticsearch:
+# # # #     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.18
+# # # #     container_name: elasticsearch
+# # # #     environment:
+# # # #       - discovery.type=single-node
+# # # #       - xpack.security.enabled=false
+# # # #     ports:
+# # # #       - "9200:19200# # #     networks:
+# # # #       - elk
+
+# # # #   logstash:
+# # # #     image: docker.elastic.co/logstash/logstash:7.17.18
+# # # #     container_name: logstash
+# # # #     volumes:
+# # # #       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+# # # #     ports:
+# # # #       - "5959:5959/udp"
+# # # #     depends_on:
+# # # #       - elasticsearch
+# # # #     networks:
+# # # #       - elk
+
+# # # #   kibana:
+# # # #     image: docker.elastic.co/kibana/kibana:7.17.18
+# # # #     container_name: kibana
+# # # #     environment:
+# # # #       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+# # # #     ports:
+# # # #       - "5601:5601"
+# # # #     depends_on:
+# # # #       - elasticsearch
+# # # #     networks:
+# # # #       - elk
+
+# # # # networks:
+# # # #   elk:
+# # # #     driver: bridge
+# # # version: '3.8'
+
+# # # services:
+# # #   flask-app:
+# # #     build: .
+# # #     container_name: flask-app
+# # #     ports:
+# # #       - "5001:5001"
+# # #     environment:
+# # #       - FLASK_APP=app1
+# # #     depends_on:
+# # #       - logstash
+# # #     networks:
+# # #       - elk
+
+# # #   elasticsearch:
+# # #     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.18
+# # #     container_name: elasticsearch
+# # #     environment:
+# # #       - discovery.type=single-node
+# # #       - xpack.security.enabled=false
+# # #     ports:
+# # #       - "9200:9200"
+# # #     networks:
+# # #       - elk
+
+# # #   logstash:
+# # #     image: docker.elastic.co/logstash/logstash:7.17.18
+# # #     container_name: logstash
+# # #     volumes:
+# # #       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+# # #     ports:
+# # #       - "5959:5959/udp"  # Logstash receives logs here
+# # #     depends_on:
+# # #       - elasticsearch
+# # #     networks:
+# # #       - elk
+
+# # #   kibana:
+# # #     image: docker.elastic.co/kibana/kibana:7.17.18
+# # #     container_name: kibana
+# # #     environment:
+# # #       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+# # #     ports:
+# # #       - "5601:5601"
+# # #     depends_on:
+# # #       - elasticsearch
+# # #     networks:
+# # #       - elk
+
+# # # networks:
+# # #   elk:
+# # #     driver: bridge
+# # version: '3.9'
+
+# # services:
+# #   flask-app:
+# #     build: .
+# #     container_name: flask-app
+# #     ports:
+# #       - "5001:5001"
+# #     environment:
+# #       - FLASK_APP=app1
+# #     depends_on:
+# #       logstash:
+# #         condition: service_healthy
+# #     networks:
+# #       - elk
+
+# #   elasticsearch:
+# #     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.18
+# #     container_name: elasticsearch
+# #     environment:
+# #       - discovery.type=single-node
+# #       - xpack.security.enabled=false
+# #       - ES_JAVA_OPTS=-Xms1g -Xmx1g
+# #     ports:
+# #       - "9200:9200"
+# #     healthcheck:
+# #       test: ["CMD", "curl", "-f", "http://localhost:9200"]
+# #       interval: 10s
+# #       timeout: 5s
+# #       retries: 5
+# #     networks:
+# #       - elk
+
+# #   logstash:
+# #     image: docker.elastic.co/logstash/logstash:7.17.18
+# #     container_name: logstash
+# #     volumes:
+# #       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+# #     ports:
+# #       - "5959:5959/udp"
+# #     depends_on:
+# #       elasticsearch:
+# #         condition: service_healthy
+# #     healthcheck:
+# #       test: ["CMD", "curl", "-f", "http://localhost:9600"]
+# #       interval: 10s
+# #       timeout: 5s
+# #       retries: 5
+# #     networks:
+# #       - elk
+
+# #   kibana:
+# #     image: docker.elastic.co/kibana/kibana:7.17.18
+# #     container_name: kibana
+# #     environment:
+# #       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+# #     ports:
+# #       - "5601:5601"
+# #     depends_on:
+# #       elasticsearch:
+# #         condition: service_healthy
+# #     networks:
+# #       - elk
+
+# # networks:
+# #   elk:
+# #     driver: bridge
+
+
+
+
+
+
+
+# # better one
+# version: '3.9'
+
+services:
+  flask-app:
+    build: .
+    container_name: flask-app
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_APP=app1
+      - LOGSTASH_HOST=logstash
+      - LOGSTASH_PORT=5959
+    depends_on:
+      logstash:
+        condition: service_healthy
+    networks:
+      - elk
+    extra_hosts:  # ✅ Fix MySQL connection to host machine
+      - "host.docker.internal:host-gateway"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.18
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ports:
+      - "19200:9200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elk
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.18
+    container_name: logstash
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5959:5959"
+      - "9600:9600"  # ✅ Needed for healthcheck to work
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elk
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.18
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - elk
+
+networks:
+  elk:
+    driver: bridge
+
+
+
+
+
+
+
+
+
+# version: '3.9'
+
+# services:
+#   flask-app:
+#     build: .
+#     container_name: flask-app
+#     ports:
+#       - "5001:5001"
+#     environment:
+#       - FLASK_APP=app1
+#       - LOGSTASH_HOST=logstash
+#       - LOGSTASH_PORT=5959
+#     depends_on:
+#       logstash:
+#         condition: service_healthy
+#     networks:
+#       - elk
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+
+#   elasticsearch:
+#     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.18
+#     container_name: elasticsearch
+#     environment:
+#       - discovery.type=single-node
+#       - xpack.security.enabled=false
+#       - ES_JAVA_OPTS=-Xms1g -Xmx1g
+#     ports:
+#       - "19200:9200"
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - elk
+
+#   logstash:
+#     image: docker.elastic.co/logstash/logstash:7.17.18
+#     container_name: logstash
+#     volumes:
+#       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+#     ports:
+#       - "5959:5959"
+#       - "9600:9600"
+#     depends_on:
+#       elasticsearch:
+#         condition: service_healthy
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl -f http://localhost:9600 || exit 1"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - elk
+
+#   kibana:
+#     image: docker.elastic.co/kibana/kibana:7.17.18
+#     container_name: kibana
+#     environment:
+#       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+#     ports:
+#       - "5601:5601"
+#     depends_on:
+#       elasticsearch:
+#         condition: service_healthy
+#     networks:
+#       - elk
+
+# networks:
+#   elk:
+#     driver: bridge
