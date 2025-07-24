@@ -1,8 +1,7 @@
-🚀 MAPSO Microservice Deployment (Docker + Docker Compose)
+🚀 MAPSO Microservice Deployment via (Docker + Docker Compose)
+
 📁 Project Structure (Simplified)
-bash
-Copy
-Edit
+
 mapso-microservice/
 ├── app/                    # FastAPI app code
 ├── tests/                 # Test files
@@ -11,12 +10,12 @@ mapso-microservice/
 ├── requirements.txt       # Python dependencies
 ├── README.md
 └── temp_files/            # Runtime file storage
+
+
 🐳 1. Dockerfile (Single Container Build)
 This builds a lightweight Python environment, installs dependencies, and runs FastAPI.
 
-Dockerfile
-Copy
-Edit
+#Dockerfile
 FROM python:3.9-slim
 
 WORKDIR /app
@@ -32,6 +31,7 @@ COPY . .
 RUN mkdir -p /app/temp_files
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+
 ✅ What it does:
 
 Sets Python 3.9 as base.
@@ -44,10 +44,9 @@ Creates a runtime folder temp_files.
 
 Starts the FastAPI server with uvicorn.
 
+
 🧩 2. docker-compose.yml (Multi-Container Runtime)
-yaml
-Copy
-Edit
+
 version: "3.8"
 
 services:
@@ -63,6 +62,7 @@ services:
       - LOG_LEVEL=DEBUG
       - PYTHONPATH=/app
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+    
 ✅ What it does:
 
 Builds the app container using the Dockerfile.
@@ -73,15 +73,16 @@ Mounts project files into the container for live updates (--reload).
 
 Passes necessary environment variables.
 
+
 ⚙️ 3. How to Deploy (Commands)
-bash
-Copy
-Edit
+
 # 1. Build and run the container(s)
 docker-compose up --build
 
 # 2. Access API Docs
 http://localhost:8001/docs
+
+
 🌐 Notes for Cloud/VPS (like GCP VM)
 Ensure port 8001 is open in firewall rules.
 
