@@ -2,6 +2,8 @@
 
 📁 Project Structure (Simplified)
 
+
+
 mapso-microservice/
 ├── app/                    # FastAPI app code
 ├── tests/                 # Test files
@@ -10,6 +12,8 @@ mapso-microservice/
 ├── requirements.txt       # Python dependencies
 ├── README.md
 └── temp_files/            # Runtime file storage
+
+
 
 
 🐳 1. Dockerfile (Single Container Build)
